@@ -1,8 +1,10 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#define PORT 80
+#define PORT 8080
 #define LISTEN_BACKLOG 50
 
 // PROTOTYPES
@@ -25,13 +27,13 @@ struct sockaddr_in init_sockaddr(struct sockaddr_in sockaddr) {
 
 int main(int argc, char *argv[]) {
 
-    int sockfd, n;
+    int sfd, n, cfd;
     char buffer[256];
     struct sockaddr_in serv_addr, client_addr;
 
     sfd = socket(AF_INET, SOCK_STREAM, 0);
     // error check
-    if (sockfd == -1) {
+    if (sfd == -1) {
         perror("Error opening socket\n");
     }
     // init struct
@@ -42,7 +44,7 @@ int main(int argc, char *argv[]) {
     if (listen(sfd, LISTEN_BACKLOG) == -1) {
         perror("Error listening\n");
     }
-    client_len = sizeof(client_addr);
+    socklen_t client_len = sizeof(client_addr);
     cfd = accept(sfd, (struct sockaddr *) &client_addr, &client_len);
 
     if (cfd == -1) {
@@ -53,11 +55,10 @@ int main(int argc, char *argv[]) {
     if (n == -1) {
         perror("Error reading from cfd\n");
     }
-    printf("message: %s\n", n);
     n = write(cfd, "Hello thank you\n", 25);
     if (n < 0) {
         perror("Error writing to cfd\n");
     }
-
+    printf("message: %s\n", buffer);
     return 0;
 }
